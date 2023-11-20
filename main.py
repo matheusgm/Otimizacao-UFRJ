@@ -1,5 +1,8 @@
 import math
 import sympy as sym
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # Função
 def funcao(x1, x2, x3, x4, x5):
@@ -86,7 +89,7 @@ def passed_tolerance(d, tol):
 
 # Gradient Method
 def gradient_method(x1, x2, x3, x4, x5, tol, max_interation):
-	k = 0
+	k = 0 # Condição de parada: limite de iteracoes;
 	N = 0.25
 	gamma = 0.8
 	t = 0
@@ -117,11 +120,10 @@ def gradient_method(x1, x2, x3, x4, x5, tol, max_interation):
 
 
 # print(hessiana(1, 1, 1, 1, 10)[2][3])
-gradient_method(1, 1, 1, 1, 1, 0.00001, 1000)
+# gradient_method(1, 1, 1, 1, 1, 0.00001, 100)
 
 
-
-# Teste
+######### Teste ################
 # def solve_gradient():
 # 	sym.init_printing()
 # 	x1,x2,x3,x4,x5 = sym.symbols('x1,x2,x3,x4,x5')
@@ -135,3 +137,29 @@ gradient_method(1, 1, 1, 1, 1, 0.00001, 1000)
 # 	print(sym.solve([dx1,dx2,dx3,dx4,dx5],(x1,x2,x3,x4,x5)))
 
 # solve_gradient()
+
+
+######### Teste 2 ################
+
+# def minha_funcao(x1, x2, x3, x4, x5):
+#     return np.sqrt(x1**2 + (np.exp(x1) - x2)**2 + (x3 + x4)**2 + (np.exp(x3 + x4) - x5)**2)
+
+# # Gerando dados para plotagem
+# x1 = np.linspace(-5, 5, 10)
+# x2 = np.linspace(-5, 5, 10)
+# x3 = np.linspace(-5, 5, 10)
+# x4 = np.linspace(-5, 5, 10)
+# x5 = np.linspace(-5, 5, 10)
+# X1, X2, X3, X4, X5 = np.meshgrid(x1, x2, x3, x4, x5)
+# Y = minha_funcao(X1, X2, X3, X4, X5)
+
+# # Plotagem 3D
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(X1, X2, X3, c=Y, cmap='viridis')
+# ax.set_xlabel('X1')
+# ax.set_ylabel('X2')
+# ax.set_zlabel('X3')
+# plt.show()
+
+print(gradiente(1,1,1,1,1))
