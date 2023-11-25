@@ -113,9 +113,56 @@ def gradient_method(x1, x2, x3, x4, x5, tol, max_interation):
 	return [x1, x2, x3, x4, x5, k]
 
 # Newton Method
+def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
+	k = 0 # Condição de parada: limite de iteracoes;
+	N = 0.25
+	gamma = 0.8
+	t = 0
+
+	d = -np.matmul(np.linalg.inv(hessiana(x1, x2, x3, x4, x5)), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+
+	while ((not passed_tolerance(d, tol)) and k < max_interation):
+		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
+		x1 = x1 + t * d[0]
+		x2 = x2 + t * d[1]
+		x3 = x3 + t * d[2]
+		x4 = x4 + t * d[3]
+		x5 = x5 + t * d[4]
+		d = -np.matmul(np.linalg.inv(hessiana(x1, x2, x3, x4, x5)), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+		k+=1
+	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
+	return [x1, x2, x3, x4, x5, k]
 
 # Quase-Newton Method
+def quase_newton_method(x1, x2, x3, x4, x5, tol, max_interation):
+	k = 0 # Condição de parada: limite de iteracoes;
+	N = 0.25
+	gamma = 0.8
+	t = 0
 
+	H = np.identity(5)
+	d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+
+	while ((not passed_tolerance(d, tol)) and k < max_interation):
+		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
+		x1_novo = x1 + t * d[0]
+		x2_novo = x2 + t * d[1]
+		x3_novo = x3 + t * d[2]
+		x4_novo = x4 + t * d[3]
+		x5_novo = x5 + t * d[4]
+		p = np.array([x1_novo - x1, x2_novo - x2, x3_novo - x3, x4_novo - x4, x5_novo - x5][:, np.newaxis])
+		q = np.array(gradiente(x1_novo, x2_novo, x3_novo, x4_novo, x5_novo))[:, np.newaxis] - np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis]
+		H_novo = ((np.matmul(p, np.transpose(p)) / np.matmul(np.transpose(p), q)) - (np.matmul(np.matmul(np.matmul(H, q), np.transpose(q)), H) / np.matmul(np.matmul(np.transpose(q), H), q)))
+		H = H + H_novo
+		x1 = x1_novo
+		x2 = x2_novo
+		x3 = x3_novo
+		x4 = x4_novo
+		x5 = x5_novo
+		d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+		k+=1
+	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
+	return [x1, x2, x3, x4, x5, k]
 
 
 
