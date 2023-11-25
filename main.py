@@ -177,6 +177,7 @@ def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 # quase_newton_DFP_method(1, 1, 1, 1, 1, 0.00001, 100)
 
 
+############### Teste do Gradiente e da Hessiana ###############
 x1, x2, x3, x4, x5 = sp.symbols('x1 x2 x3 x4 x5')
 variables = [x1, x2, x3, x4, x5]
 f = sp.sqrt(x1**2 + (sp.exp(x1) - x2)**2 + (x3 + x4)**2 + (sp.exp(x3+x4) - x5)**2)
@@ -189,6 +190,5 @@ grad_func = sp.lambdify(variables, gradient, 'numpy')
 hess_func = sp.lambdify(variables, hessian, 'numpy')
 
 h = hess_func(1,1,1,1,1)
-print(h)
-print(sp.det(sp.Matrix(h)))
-print(hessiana(1,1,1,1,1))
+# print(h)
+# print(sp.det(sp.Matrix(h)))
