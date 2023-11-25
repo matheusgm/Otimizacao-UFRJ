@@ -63,52 +63,42 @@ def hessiana(x1, x2, x3, x4, x5):
 		]
 
 def phi(x1, x2, x3, x4, x5, d, t):
-	phi_x1 = x1 + d[0] * t
-	phi_x2 = x2 + d[1] * t
-	phi_x3 = x3 + d[2] * t
-	phi_x4 = x4 + d[3] * t
-	phi_x5 = x5 + d[4] * t
+	phi_x1 = x1 + (d[0] * t)
+	phi_x2 = x2 + (d[1] * t)
+	phi_x3 = x3 + (d[2] * t)
+	phi_x4 = x4 + (d[3] * t)
+	phi_x5 = x5 + (d[4] * t)
 	return funcao(phi_x1, phi_x2, phi_x3, phi_x4, phi_x5)
 
-def gradiente_x_d(x1, x2, x3, x4, x5, d):
-    grad = gradiente(x1,x2, x3, x4, x5)
-    return grad[0]*d[0] + grad[1]*d[1] + grad[2]*d[2] + grad[3]*d[3] + grad[4]*d[4]
-
 def armijo(N, gamma, x1, x2, x3, x4, x5, d):
-	t = 1.0
-	while(phi(x1,x2, x3, x4, x5, d, t) > (funcao(x1,x2, x3, x4, x5) + N * t * gradiente_x_d(x1,x2, x3, x4, x5, d))):
+	t = 1
+	chamadas = 0
+	while(phi(x1, x2, x3, x4, x5, d, t) > (funcao(x1, x2, x3, x4, x5) + (N * t * np.dot(gradiente(x1, x2, x3, x4, x5), d)))):
 		t *= gamma
-	return t
-
-def passed_tolerance(d, tol):
-	for i in range(len(d)):
-		if(abs(d[i]) >= tol): return False
-	return True
+		chamadas+=1
+	return t, chamadas
 
 # Gradient Method
 def gradient_method(x1, x2, x3, x4, x5, tol, max_interation):
 	k = 0 # Condição de parada: limite de iteracoes;
 	N = 0.25
 	gamma = 0.8
-	t = 0
-
-	d = gradiente(x1, x2, x3, x4, x5)
-	for i in range(len(d)):
-		d[i] = -d[i]
+	t = 1
+	chamadasArmijo = 0
+	d = -np.array(gradiente(x1, x2, x3, x4, x5))
 	
-	while ((not passed_tolerance(d, tol)) and k < max_interation):
-		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
-		x1 = x1 + t * d[0]
-		x2 = x2 + t * d[1]
-		x3 = x3 + t * d[2]
-		x4 = x4 + t * d[3]
-		x5 = x5 + t * d[4]
-		d = gradiente(x1, x2, x3, x4, x5)
-		for i in range(len(d)):
-			d[i] = -d[i]
+	while (np.linalg.norm(d) > tol and k < max_interation):
+		t, ca = armijo(N, gamma, x1, x2, x3, x4, x5, d)
+		chamadasArmijo+=ca
+		x1 = x1 + (t * d[0])
+		x2 = x2 + (t * d[1])
+		x3 = x3 + (t * d[2])
+		x4 = x4 + (t * d[3])
+		x5 = x5 + (t * d[4])
+		d = -np.array(gradiente(x1, x2, x3, x4, x5))
 		k+=1
-	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
-	return [x1, x2, x3, x4, x5, k]
+	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}  | gradiente:{np.linalg.norm(gradiente(x1, x2, x3, x4, x5))}  | # Armijo: {chamadasArmijo}")
+	return [x1, x2, x3, x4, x5, k, chamadasArmijo]
 
 # Newton Method
 def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
@@ -116,6 +106,7 @@ def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 	N = 0.25
 	gamma = 0.8
 	t = 0
+	chamadasArmijo = 0
 	hess = hessiana(x1, x2, x3, x4, x5)
 	if(np.linalg.det(hess) < tol):
 		print("Determinante proximo de 0. (start)")
@@ -123,8 +114,9 @@ def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 
 	d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5)))
 
-	while ((not passed_tolerance(d, tol)) and k < max_interation):
-		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
+	while (np.linalg.norm(d) > tol and k < max_interation):
+		t, ca = armijo(N, gamma, x1, x2, x3, x4, x5, d)
+		chamadasArmijo+=ca
 		x1 = x1 + t * d[0]
 		x2 = x2 + t * d[1]
 		x3 = x3 + t * d[2]
@@ -135,8 +127,8 @@ def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 			break
 		d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5)))
 		k+=1
-	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
-	return [x1, x2, x3, x4, x5, k]
+	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)} | # Armijo: {chamadasArmijo}")
+	return [x1, x2, x3, x4, x5, k, chamadasArmijo]
 
 # Quase-Newton Method (DFP)
 def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
@@ -144,12 +136,13 @@ def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 	N = 0.25
 	gamma = 0.8
 	t = 0
-
+	chamadasArmijo = 0
 	H = np.identity(5)
 	d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5)))
 
-	while ((not passed_tolerance(d, tol)) and k < max_interation):
-		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
+	while (np.linalg.norm(d) > tol and k < max_interation):
+		t, ca = armijo(N, gamma, x1, x2, x3, x4, x5, d)
+		chamadasArmijo+=ca
 		x1_novo = x1 + t * d[0]
 		x2_novo = x2 + t * d[1]
 		x3_novo = x3 + t * d[2]
@@ -172,15 +165,15 @@ def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 		x5 = x5_novo
 		d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5)))
 		k+=1
-	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
-	return [x1, x2, x3, x4, x5, k]
+	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)} | gradiente:{np.linalg.norm(gradiente(x1, x2, x3, x4, x5))} | # Armijo: {chamadasArmijo}")
+	return [x1, x2, x3, x4, x5, k, chamadasArmijo]
 
 
 
 # print(hessiana(1, 1, 1, 1, 10)[2][3])
-# gradient_method(1, 1, 1, 1, 1, 0.00001, 100)
+gradient_method(0.1, 0.1, 0.1, 0.1, 0.1, 0.0000001, 100)
 # print(newton_method(-0.4, -0.5, -0.6, -0.5, -0.5, 0.00001, 100))
-quase_newton_DFP_method(1, 1, 1, 1, 1, 0.00001, 100)
+# quase_newton_DFP_method(1,1,1,1,1, 0.0000001, 1000)
 
 ############### Teste do Gradiente e da Hessiana ###############
 # x1, x2, x3, x4, x5 = sp.symbols('x1 x2 x3 x4 x5')
@@ -197,6 +190,11 @@ quase_newton_DFP_method(1, 1, 1, 1, 1, 0.00001, 100)
 # h = hess_func(1,1,1,1,1)
 # print(h)
 # print(sp.det(sp.Matrix(h)))
+
+# g = grad_func(0.0000000000000001,0.9999999999999999,0.00000000000000001,0.000000000000000001,0.999999999999999)
+# print(funcao(0.0000000000000001,0.9999999999999999,0.00000000000000001,0.000000000000000001,0.999999999999999))
+# print(g)
+# print(gradiente(0.001,0.999,0.001,0.001,0.999))
 
 
 ############### Teste do "np.dot" e "np.outer" ###############
