@@ -1,8 +1,6 @@
 import math
-import sympy as sym
+import sympy as sp
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 # Função
 def funcao(x1, x2, x3, x4, x5):
@@ -30,9 +28,9 @@ def hessiana(x1, x2, x3, x4, x5):
     #2
 	dx2x1 = dx1x2
 	dx2x2 = (1/((x1**2 + (math.exp(x1) - x2)**2 + (x3 + x4)**2 + (math.exp(x3+x4) - x5)**2)**(0.5)))-(((math.exp(x1)-x2)**2)/((x1**2 + (math.exp(x1) - x2)**2 + (x3 + x4)**2 + (math.exp(x3+x4) - x5)**2)**(1.5)))
-	dx2x3 = ((math.exp(x1)-x2)*(2*(x3+x4))+2*math.exp(x3+x4)*(math.exp(x3+x4)-x5))/(2*((x1**2 + (math.exp(x1) - x2)**2 + (x3 + x4)**2 + (math.exp(x3+x4) - x5)**2)**(1.5)))
+	dx2x3 = ((math.exp(x1)-x2)*(2*(x3+x4)+ 2*math.exp(x3+x4)*(math.exp(x3+x4)-x5)))/(2*((x1**2 + (math.exp(x1) - x2)**2 + (x3 + x4)**2 + (math.exp(x3+x4) - x5)**2)**(1.5)))
 	dx2x4 = dx2x3
-	dx2x5 = ((math.exp(x1)-x2)*(math.exp(x3+x4)-x5))/(((x1**2 + (math.exp(x1) - x2)**2 + (x3 + x4)**2 + (math.exp(x3+x4) - x5)**2)**(1.5)))
+	dx2x5 = -((math.exp(x1)-x2)*(math.exp(x3+x4)-x5))/(((x1**2 + (math.exp(x1) - x2)**2 + (x3 + x4)**2 + (math.exp(x3+x4) - x5)**2)**(1.5)))
 	
     #3
 	dx3x1 = dx1x3
@@ -118,8 +116,12 @@ def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 	N = 0.25
 	gamma = 0.8
 	t = 0
+	hess = hessiana(x1, x2, x3, x4, x5)
+	if(np.linalg.det(hess) < tol):
+		print("Determinante proximo de 0. (start)")
+		return [x1, x2, x3, x4, x5, k]
 
-	d = -np.matmul(np.linalg.inv(hessiana(x1, x2, x3, x4, x5)), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+	d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
 
 	while ((not passed_tolerance(d, tol)) and k < max_interation):
 		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
@@ -128,13 +130,16 @@ def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 		x3 = x3 + t * d[2]
 		x4 = x4 + t * d[3]
 		x5 = x5 + t * d[4]
-		d = -np.matmul(np.linalg.inv(hessiana(x1, x2, x3, x4, x5)), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+		if(np.linalg.det(hess) < tol):
+			print("Determinante proximo de 0.")
+			break
+		d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
 		k+=1
 	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
 	return [x1, x2, x3, x4, x5, k]
 
-# Quase-Newton Method
-def quase_newton_method(x1, x2, x3, x4, x5, tol, max_interation):
+# Quase-Newton Method (DFP)
+def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 	k = 0 # Condição de parada: limite de iteracoes;
 	N = 0.25
 	gamma = 0.8
@@ -168,45 +173,22 @@ def quase_newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 
 # print(hessiana(1, 1, 1, 1, 10)[2][3])
 # gradient_method(1, 1, 1, 1, 1, 0.00001, 100)
+# print(newton_method(-0.4, -0.5, -0.6, -0.5, -0.5, 0.00001, 100))
+# quase_newton_DFP_method(1, 1, 1, 1, 1, 0.00001, 100)
 
 
-######### Teste ################
-# def solve_gradient():
-# 	sym.init_printing()
-# 	x1,x2,x3,x4,x5 = sym.symbols('x1,x2,x3,x4,x5')
+x1, x2, x3, x4, x5 = sp.symbols('x1 x2 x3 x4 x5')
+variables = [x1, x2, x3, x4, x5]
+f = sp.sqrt(x1**2 + (sp.exp(x1) - x2)**2 + (x3 + x4)**2 + (sp.exp(x3+x4) - x5)**2)
 
-# 	dx1 = sym.Eq(((x1**2 + (sym.exp(x1) - x2)**2 + (x3 + x4)**2 + (sym.exp(x3+x4) - x5)**2)**(-0.5))*(x1 + (sym.exp(x1)-x2)*sym.exp(x1)),0)
-# 	dx2 = sym.Eq(((x1**2 + (sym.exp(x1) - x2)**2 + (x3 + x4)**2 + (sym.exp(x3+x4) - x5)**2)**(-0.5))*(-1*(sym.exp(x1)-x2)),0)
-# 	dx3 = sym.Eq(((x1**2 + (sym.exp(x1) - x2)**2 + (x3 + x4)**2 + (sym.exp(x3+x4) - x5)**2)**(-0.5))*((x3+x4)+(sym.exp(x3+x4) - x5)*sym.exp(x3+x4)),0)
-# 	dx4 = sym.Eq(((x1**2 + (sym.exp(x1) - x2)**2 + (x3 + x4)**2 + (sym.exp(x3+x4) - x5)**2)**(-0.5))*((x3+x4)+(sym.exp(x3+x4) - x5)*sym.exp(x3+x4)),0)
-# 	dx5 = sym.Eq(((x1**2 + (sym.exp(x1) - x2)**2 + (x3 + x4)**2 + (sym.exp(x3+x4) - x5)**2)**(-0.5))*(-1*(sym.exp(x3+x4) - x5)),0)
+gradient = [sp.diff(f, var) for var in variables]  # Gradiente da função f em relação às variáveis
+hessian = sp.Matrix(sp.hessian(f, variables))  # Hessiana da função f
 
-# 	print(sym.solve([dx1,dx2,dx3,dx4,dx5],(x1,x2,x3,x4,x5)))
+# Conversão das expressões do gradiente e da hessiana em funções lambdas para avaliação numérica
+grad_func = sp.lambdify(variables, gradient, 'numpy')
+hess_func = sp.lambdify(variables, hessian, 'numpy')
 
-# solve_gradient()
-
-
-######### Teste 2 ################
-
-# def minha_funcao(x1, x2, x3, x4, x5):
-#     return np.sqrt(x1**2 + (np.exp(x1) - x2)**2 + (x3 + x4)**2 + (np.exp(x3 + x4) - x5)**2)
-
-# # Gerando dados para plotagem
-# x1 = np.linspace(-5, 5, 10)
-# x2 = np.linspace(-5, 5, 10)
-# x3 = np.linspace(-5, 5, 10)
-# x4 = np.linspace(-5, 5, 10)
-# x5 = np.linspace(-5, 5, 10)
-# X1, X2, X3, X4, X5 = np.meshgrid(x1, x2, x3, x4, x5)
-# Y = minha_funcao(X1, X2, X3, X4, X5)
-
-# # Plotagem 3D
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# ax.scatter(X1, X2, X3, c=Y, cmap='viridis')
-# ax.set_xlabel('X1')
-# ax.set_ylabel('X2')
-# ax.set_zlabel('X3')
-# plt.show()
-
-print(gradiente(1,1,1,1,1))
+h = hess_func(1,1,1,1,1)
+print(h)
+print(sp.det(sp.Matrix(h)))
+print(hessiana(1,1,1,1,1))
