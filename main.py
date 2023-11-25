@@ -165,15 +165,15 @@ def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 		x5 = x5_novo
 		d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5)))
 		k+=1
-	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)} | gradiente:{np.linalg.norm(gradiente(x1, x2, x3, x4, x5))} | # Armijo: {chamadasArmijo}")
+	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)} | gradiente:{gradiente(x1, x2, x3, x4, x5)} | # Armijo: {chamadasArmijo}")
 	return [x1, x2, x3, x4, x5, k, chamadasArmijo]
 
 
 
 # print(hessiana(1, 1, 1, 1, 10)[2][3])
-gradient_method(0.1, 0.1, 0.1, 0.1, 0.1, 0.0000001, 100)
+# gradient_method(0.3, 0.7, 0.1, 2.1, 0.7, 0.0000001, 100)
 # print(newton_method(-0.4, -0.5, -0.6, -0.5, -0.5, 0.00001, 100))
-# quase_newton_DFP_method(1,1,1,1,1, 0.0000001, 1000)
+quase_newton_DFP_method(-0.1,-0.1,-0.1,-0.1,-0.1, 0.0000001, 100)
 
 ############### Teste do Gradiente e da Hessiana ###############
 # x1, x2, x3, x4, x5 = sp.symbols('x1 x2 x3 x4 x5')
