@@ -121,7 +121,7 @@ def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 		print("Determinante proximo de 0. (start)")
 		return [x1, x2, x3, x4, x5, k]
 
-	d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+	d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5)))
 
 	while ((not passed_tolerance(d, tol)) and k < max_interation):
 		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
@@ -133,7 +133,7 @@ def newton_method(x1, x2, x3, x4, x5, tol, max_interation):
 		if(np.linalg.det(hess) < tol):
 			print("Determinante proximo de 0.")
 			break
-		d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+		d = -np.matmul(np.linalg.inv(hess), np.array(gradiente(x1, x2, x3, x4, x5)))
 		k+=1
 	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
 	return [x1, x2, x3, x4, x5, k]
@@ -146,7 +146,7 @@ def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 	t = 0
 
 	H = np.identity(5)
-	d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+	d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5)))
 
 	while ((not passed_tolerance(d, tol)) and k < max_interation):
 		t = armijo(N, gamma, x1, x2, x3, x4, x5, d)
@@ -155,16 +155,22 @@ def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 		x3_novo = x3 + t * d[2]
 		x4_novo = x4 + t * d[3]
 		x5_novo = x5 + t * d[4]
-		p = np.array([x1_novo - x1, x2_novo - x2, x3_novo - x3, x4_novo - x4, x5_novo - x5][:, np.newaxis])
-		q = np.array(gradiente(x1_novo, x2_novo, x3_novo, x4_novo, x5_novo))[:, np.newaxis] - np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis]
-		H_novo = ((np.matmul(p, np.transpose(p)) / np.matmul(np.transpose(p), q)) - (np.matmul(np.matmul(np.matmul(H, q), np.transpose(q)), H) / np.matmul(np.matmul(np.transpose(q), H), q)))
+		p = np.array([x1_novo - x1, x2_novo - x2, x3_novo - x3, x4_novo - x4, x5_novo - x5])
+		q = np.array(gradiente(x1_novo, x2_novo, x3_novo, x4_novo, x5_novo)) - np.array(gradiente(x1, x2, x3, x4, x5))
+		
+		numerador1 = np.outer(p, p.T)
+		denominador1 = np.dot(p.T, q)
+		numerador2 = np.outer(np.dot(H, q), np.dot(q.T, H))
+		denominador2 = np.matmul(np.matmul(q.T, H),q)
+
+		H_novo = (numerador1 / denominador1) - (numerador2 / denominador2)
 		H = H + H_novo
 		x1 = x1_novo
 		x2 = x2_novo
 		x3 = x3_novo
 		x4 = x4_novo
 		x5 = x5_novo
-		d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5))[:, np.newaxis])
+		d = -np.matmul(H, np.array(gradiente(x1, x2, x3, x4, x5)))
 		k+=1
 	print(f"Iter: {k} | x1: {x1} | x2: {x2} | x3: {x3} | x4: {x4} | x5: {x5} | value: {funcao(x1, x2, x3, x4, x5)}")
 	return [x1, x2, x3, x4, x5, k]
@@ -174,21 +180,44 @@ def quase_newton_DFP_method(x1, x2, x3, x4, x5, tol, max_interation):
 # print(hessiana(1, 1, 1, 1, 10)[2][3])
 # gradient_method(1, 1, 1, 1, 1, 0.00001, 100)
 # print(newton_method(-0.4, -0.5, -0.6, -0.5, -0.5, 0.00001, 100))
-# quase_newton_DFP_method(1, 1, 1, 1, 1, 0.00001, 100)
-
+quase_newton_DFP_method(1, 1, 1, 1, 1, 0.00001, 100)
 
 ############### Teste do Gradiente e da Hessiana ###############
-x1, x2, x3, x4, x5 = sp.symbols('x1 x2 x3 x4 x5')
-variables = [x1, x2, x3, x4, x5]
-f = sp.sqrt(x1**2 + (sp.exp(x1) - x2)**2 + (x3 + x4)**2 + (sp.exp(x3+x4) - x5)**2)
+# x1, x2, x3, x4, x5 = sp.symbols('x1 x2 x3 x4 x5')
+# variables = [x1, x2, x3, x4, x5]
+# f = sp.sqrt(x1**2 + (sp.exp(x1) - x2)**2 + (x3 + x4)**2 + (sp.exp(x3+x4) - x5)**2)
 
-gradient = [sp.diff(f, var) for var in variables]  # Gradiente da função f em relação às variáveis
-hessian = sp.Matrix(sp.hessian(f, variables))  # Hessiana da função f
+# gradient = [sp.diff(f, var) for var in variables]  # Gradiente da função f em relação às variáveis
+# hessian = sp.Matrix(sp.hessian(f, variables))  # Hessiana da função f
 
-# Conversão das expressões do gradiente e da hessiana em funções lambdas para avaliação numérica
-grad_func = sp.lambdify(variables, gradient, 'numpy')
-hess_func = sp.lambdify(variables, hessian, 'numpy')
+# # Conversão das expressões do gradiente e da hessiana em funções lambdas para avaliação numérica
+# grad_func = sp.lambdify(variables, gradient, 'numpy')
+# hess_func = sp.lambdify(variables, hessian, 'numpy')
 
-h = hess_func(1,1,1,1,1)
+# h = hess_func(1,1,1,1,1)
 # print(h)
 # print(sp.det(sp.Matrix(h)))
+
+
+############### Teste do "np.dot" e "np.outer" ###############
+# sk = np.array([1, 2, 3])  # Vetor s_k
+# yk = np.array([4, 5, 6])  # Vetor y_k
+# Bk = np.array([[2, 0, 0], [0, 3, 0], [0, 0, 4]])  # Matriz B_k
+
+# # Primeira parcela
+# skTyk = np.dot(sk, yk)  # Produto interno entre sk e yk
+# first_term = np.outer(sk, sk) / skTyk  # Produto externo dividido por skTyk
+
+# # Segunda parcela
+# ykTBk = np.dot(yk, np.dot(Bk, yk))  # yk^T * Bk * yk
+# second_term = -np.outer(np.dot(Bk, yk), np.dot(yk, Bk)) / ykTBk  # Produto externo dividido por ykTBk
+
+# # Atualização de Bk
+# Bk_plus_1 = Bk + first_term + second_term
+
+# print("Primeira parcela:")
+# print(first_term)
+# print("\nSegunda parcela:")
+# print(second_term)
+# print("\nMatriz Bk atualizada:")
+# print(Bk_plus_1)
