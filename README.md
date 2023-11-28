@@ -3,6 +3,7 @@
 ![funcao](https://github.com/matheusgm/Otimizacao-UFRJ/assets/41809106/5e6391bc-dfe9-4bef-8768-c100a6cb4d64)
 
 # Analise e Resultados
+tolerância = 1x10^-7 e max interações = 100
 
 ## Resultados
 * Gradient Method:
