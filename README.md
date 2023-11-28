@@ -5,7 +5,8 @@
 ## Resultados
 * Gradient Method:
 
-![resultados_gradiente](https://github.com/matheusgm/Otimizacao-UFRJ/assets/41809106/563adc48-452f-48b6-ab7d-e7205ac9a14b)
+![resultados_gradiente](https://github.com/matheusgm/Otimizacao-UFRJ/assets/41809106/70fc4eba-e090-430f-b73d-a0fc2f2dfe33)
+
 
 * Newton Method:
 
@@ -13,7 +14,7 @@ O algorítimo falha, pois não é possível inverter a hessiana. O determinante 
 
 * Quase-Newton Method:
 
-![resultados_quse_newton](https://github.com/matheusgm/Otimizacao-UFRJ/assets/41809106/13656365-cfb1-4c62-9995-524650e668b0)
+![resultados_quse_newton](https://github.com/matheusgm/Otimizacao-UFRJ/assets/41809106/88a6bd57-4f97-4072-a109-b78ea13000c3)
 
 ## Analise
 ![x2exp2](https://github.com/matheusgm/Otimizacao-UFRJ/assets/41809106/7e858583-bb0c-4aa7-be95-7e0636101161)
